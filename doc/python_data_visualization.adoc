@@ -1,0 +1,231 @@
+= Python Data Vizualization
+
+- Dash opensource framework based on flask, react.js and ploty.js
+
+== How to run
+
+----
+python3 -m venv env
+
+env/Scripts/activate
+
+pip install -r requirements.txt
+
+python3 app.py
+----
+
+== Prepare the environement
+
+.Install
+[source, shell]
+----
+pip install virtualenv
+----
+
+.create the virtual environement
+[source, shell]
+----
+mkdir sensor_data_dashboard && cd sensor_data_dashboard
+python3 -m venv env
+----
+.ativate the environement (linux)
+[source,shell]
+----
+source env/bin/activate
+----
+
+.ativate the environement (window)
+[source,shell]
+----
+env/Scripts/activate
+----
+
+.install dependencies
+[source, shell]
+----
+pip install dash==1.13.3
+pip install pandas
+----
+
+== Get The data samples
+ Using the dataset from kaggle https://www.kaggle.com/neuromusic/avocado-prices
+
+== Create the Application layout
+
+[source, python]
+----
+# sensor_data_dashboard/app.py
+
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import pandas as pd
+
+data = pd.read_csv("avocado.csv")
+data = data.query("type == 'conventional' and region == 'Albany'")
+data["Date"] = pd.to_datetime(data["Date"], format="%Y-%m-%d")
+data.sort_values("Date", inplace=True)
+
+app = dash.Dash(__name__)
+
+app.layout = html.Div(
+    children=[
+        html.H1(
+            children="Sensor",
+            style={"fontSize": "48px", "color": "red"}            
+        ),
+        html.P(
+            children="Analye the behavior of sensor data from mcu"
+        ),
+        dcc.Graph(
+            figure={
+                "data":[
+                    {
+                        "x": data["Date"],
+                        "y": data["AveragePrice"],
+                        "type":"lines",
+                    },
+                ],
+                "layout":{"title":"Average Signal"},
+            },
+        ),
+        dcc.Graph(
+            figure={
+                "data": [
+                    {
+                        "x": data["Date"],
+                        "y": data["Total Volume"],
+                        "type": "lines",
+                    },
+                ],
+                "layout": {"title": "Total Signal"},
+            },
+        ),
+    ],
+)
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
+----
+
+=== Apply styles
+ Create a folder assets/ in the root of the project and include the style.css file
+
+.style file (assets/style.css)
+[source, css]
+----
+.header-title {
+    font-size: 48px;
+    color: lightseagreen;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.graph-row {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    max-width: 1200px;
+}
+
+.graph-col1 {
+    width: 600px;
+}
+
+.graph-col2 {
+    width: 600px;
+}
+----
+
+.app with aditional style
+[source, python]
+----
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import pandas as pd
+
+data = pd.read_csv("avocado.csv")
+data = data.query("type == 'conventional' and region == 'Albany'")
+data["Date"] = pd.to_datetime(data["Date"], format="%Y-%m-%d")
+data.sort_values("Date", inplace=True)
+
+external_stylesheets = [
+    {
+        "href": "https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap",
+        "rel": "stylesheet",
+    },
+]
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app.title = "Analise Sensor data"
+
+graphRow1 = html.Div(
+    children=[
+        dcc.Graph(
+            figure={
+                "data": [
+                    {
+                        "x": data["Date"],
+                        "y": data["AveragePrice"],
+                        "type":"lines",
+                        "hovertemplate": "$%{y:.2f}"
+                        "<extra></extra>"
+                    },
+                ],
+                "layout":{"title": "Average Signal"},
+            },
+        ),
+        dcc.Graph(
+            figure={
+                "data": [
+                    {
+                        "x": data["Date"],
+                        "y": data["Total Volume"],
+                        "type": "lines",
+                    },
+                ],
+                "layout": {"title": "Total Signal"},
+            },
+        ),
+    ],
+    className="graph-row",
+)
+
+app.layout = html.Div(
+    children=[
+        html.H1(
+            children="Sensor Analytics",
+            className="header-title"
+        ),
+        html.P(
+            children="Analye the behavior of sensor data from mcu"
+        ),
+        graphRow1,
+        graphRow1
+
+    ],
+)
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
+----
+
+== Interact with the app with callbacks
+
+
+== Deploy
+
+.Create requirements.txt file
+----
+Brotli==1.0.9
+click==8.0.1
+colorama==0.4.4
+dash==1.13.3
+pandas==1.2.4
+gunicorn==20.0.4
+----
+
+.Create Procfile
+----
+web: gunicorn app:server
+----

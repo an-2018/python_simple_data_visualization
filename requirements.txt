@@ -1,0 +1,6 @@
+Brotli==1.0.9
+click==8.0.1
+colorama==0.4.4
+dash==1.13.3
+pandas==1.2.4
+gunicorn==20.0.4
