@@ -6,7 +6,11 @@
 ```
 python3 -m venv env
 
-env/Scripts/activate
+# windows
+env\Scripts\activate
+
+# linux
+source env/bin/activate
 ```
 
 - Install and run the applicatin server
